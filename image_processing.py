@@ -10,10 +10,11 @@ class ImageProcessing():
     # def __init__(self, gateway):
     #     self.gateway = gateway
 
-    # class Java:
-    #     implements = ["PACKAGE.INTERFEJS"]
+    class Java:
+        implements = ["sample.ImageProcessor"]
 
-    def __init__(self):
+    def __init__(self, gateway):
+        self.gateway = gateway
         self.kelvin_table = {
             1000: (255, 56, 0),
             1100: (255, 71, 0),
@@ -127,10 +128,6 @@ class ImageProcessing():
             11900: (195, 210, 255),
             12000: (195, 209, 255)} 
 
-    def createLUT(self, x, y):
-        spl = UnivariateSpline(x,y)
-        return spl(xrange(256))
-
     def histograms(self):
         img = cv2.imread('swap/image.jpg')
         img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -155,13 +152,11 @@ class ImageProcessing():
         plt.savefig("swap/lum.jpg")
         plt.clf()
     
-
     def contrast(self, contrast):
         img = Image.open('swap/image.jpg')
         cont = ImageEnhance.Contrast(img)
         img = cont.enhance(contrast)
         img.save('swap/processed.jpg')
-
 
     def brightness(self, brightness):
         img = Image.open('swap/image.jpg')
@@ -193,17 +188,16 @@ class ImageProcessing():
         image = image.convert('RGB', color_matrix)
         image.save('swap/processed.jpg')
 
+
 if __name__ == "__main__":
     dirName = "swap"
     if not os.path.exists(dirName):
         os.mkdir(dirName)
-    # gateway = JavaGateway(
-    #     callback_server_parameters=CallbackServerParameters()
-    # )
-    processor = ImageProcessing()
-    #processor.saturation(0.5)
-    processor.color_temperature(9500)
-    #gateway.entry_point.setProcessor(processor)
+    gateway = JavaGateway(
+        callback_server_parameters=CallbackServerParameters()
+    )
+    processor = ImageProcessing(gateway)
+    gateway.entry_point.setProcessor(processor)
 
 
 
