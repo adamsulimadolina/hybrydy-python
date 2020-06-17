@@ -184,8 +184,14 @@ class ImageProcessing():
     def color_temperature(self, value):
         image = Image.open('swap/image.jpg')
         r, g, b = self.kelvin_table[value]
-        color_matrix = (r / 255.0, 0.0, 0.0, 0.0, 0.0, g / 255.0, 0.0, 0.0, 0.0, 0.0, b / 255.0, 0.0)
-        image = image.convert('RGB', color_matrix)
+        matrix = (r / 255.0, 0.0, 0.0, 0.0, 0.0, g / 255.0, 0.0, 0.0, 0.0, 0.0, b / 255.0, 0.0)
+        image = image.convert('RGB', matrix)
+        image.save('swap/processed.jpg')
+
+    def color_balance(self, r_scalar, g_scalar, b_scalar):
+        image = Image.open('swap/image.jpg')
+        matrix = (r_scalar, 0.0, 0.0, 0.0, 0.0, g_scalar, 0.0, 0.0, 0.0, 0.0, b_scalar, 0.0)
+        image = image.convert('RGB', matrix)
         image.save('swap/processed.jpg')
 
 
