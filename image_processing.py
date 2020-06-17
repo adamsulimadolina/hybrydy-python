@@ -1,8 +1,10 @@
 from cv2 import cv2
 import numpy as np
+import os
 from matplotlib import pyplot as plt
 from PIL import Image, ImageEnhance
 from py4j.java_gateway import JavaGateway, CallbackServerParameters
+from scipy.interpolate import UnivariateSpline
 
 class ImageProcessing():
     # def __init__(self, gateway):
@@ -125,8 +127,12 @@ class ImageProcessing():
             11900: (195, 210, 255),
             12000: (195, 209, 255)} 
 
+    def createLUT(self, x, y):
+        spl = UnivariateSpline(x,y)
+        return spl(xrange(256))
+
     def histograms(self):
-        img = cv2.imread('abc.jpg')
+        img = cv2.imread('swap/image.jpg')
         img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         img_lum = cv2.cvtColor(img, cv2.COLOR_BGR2YCR_CB)
         histr = cv2.calcHist([img_rgb],[0],None,[256],[0,256])
@@ -154,59 +160,49 @@ class ImageProcessing():
         img = Image.open('swap/image.jpg')
         cont = ImageEnhance.Contrast(img)
         img = cont.enhance(contrast)
-        img.save('swap/test.jpg')
+        img.save('swap/processed.jpg')
 
 
     def brightness(self, brightness):
         img = Image.open('swap/image.jpg')
         bright = ImageEnhance.Brightness(img)
         img = bright.enhance(brightness)
-        img.save('swap/test.jpg')
+        img.save('swap/processed.jpg')
 
     def saturation(self, saturation):
         img = Image.open('swap/image.jpg')
         sat = ImageEnhance.Color(img)
         img = sat.enhance(saturation)
-        img.save('swap/test.jpg')
-
-    def get_path(self, path, name):
-        if (path.endswith('.png') or path.endswith('.bmp') or path.endswith('.gif') or path.endswith('.jpg')):
-            extension = path[-4:]
-            path = path[:-4]
-            path = path + name + extension
-            return path 
+        img.save('swap/processed.jpg')
 
     def smoothing(self):
         image = cv2.imread('swap/image.jpg')
         image = cv2.blur(image,(5,5))
-        new_path = self.get_path('swap/image.jpg', 'Smoothing')
-        cv2.imwrite(new_path, image)
+        cv2.imwrite('swap/processed.jpg', image)
 
     def sharpening(self):
         matrix = np.array([[-1,-1,-1], [-1,9,-1], [-1,-1,-1]])
         image = cv2.imread('swap/image.jpg')
         image = cv2.filter2D(image, -1, matrix)
-        new_path = self.get_path('swap/image.jpg', 'Sharpening')
-        cv2.imwrite(new_path, image)
+        cv2.imwrite('swap/processed.jpg', image)
 
     def color_temperature(self, value):
         image = Image.open('swap/image.jpg')
         r, g, b = self.kelvin_table[value]
         color_matrix = (r / 255.0, 0.0, 0.0, 0.0, 0.0, g / 255.0, 0.0, 0.0, 0.0, 0.0, b / 255.0, 0.0)
         image = image.convert('RGB', color_matrix)
-        image = np.array(image)
-        new_path = self.get_path('swap/image.jpg', 'Temperature')
-        cv2.imwrite(new_path, image)
+        image.save('swap/processed.jpg')
 
 if __name__ == "__main__":
+    dirName = "swap"
+    if not os.path.exists(dirName):
+        os.mkdir(dirName)
     # gateway = JavaGateway(
     #     callback_server_parameters=CallbackServerParameters()
     # )
     processor = ImageProcessing()
     #processor.saturation(0.5)
-    processor.sharpening()
-    processor.smoothing()
-    processor.color_temperature(1000)
+    processor.color_temperature(9500)
     #gateway.entry_point.setProcessor(processor)
 
 
