@@ -129,7 +129,7 @@ class ImageProcessing():
             12000: (195, 209, 255)} 
 
     def histograms(self):
-        img = cv2.imread('swap/image.jpg')
+        img = cv2.imread('swap/image.png')
         img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         img_lum = cv2.cvtColor(img, cv2.COLOR_BGR2YCR_CB)
         histr = cv2.calcHist([img_rgb],[0],None,[256],[0,256])
@@ -140,60 +140,77 @@ class ImageProcessing():
         plt.xlabel("Pixel value")
         plt.ylabel("Number of pixels")
         plt.plot(histr, color="r", label="Red")
-        plt.savefig("swap/red.jpg")
+        plt.savefig("swap/red.png")
         plt.clf()
         plt.plot(histg, color="g", label="Green")
-        plt.savefig("swap/green.jpg")
+        plt.savefig("swap/green.png")
         plt.clf()
         plt.plot(histb, color="b", label="Blue")
-        plt.savefig("swap/blue.jpg")
+        plt.savefig("swap/blue.png")
         plt.clf()
         plt.plot(histl, color="grey", label="Lumi")
-        plt.savefig("swap/lum.jpg")
+        plt.savefig("swap/lum.png")
         plt.clf()
     
     def contrast(self, contrast):
-        img = Image.open('swap/image.jpg')
+        img = Image.open('swap/image.png')
         cont = ImageEnhance.Contrast(img)
         img = cont.enhance(contrast)
-        img.save('swap/processed.jpg')
+        img.save('swap/processed.png')
 
     def brightness(self, brightness):
-        img = Image.open('swap/image.jpg')
+        img = Image.open('swap/image.png')
         bright = ImageEnhance.Brightness(img)
         img = bright.enhance(brightness)
-        img.save('swap/processed.jpg')
+        img.save('swap/processed.png')
 
     def saturation(self, saturation):
-        img = Image.open('swap/image.jpg')
+        img = Image.open('swap/image.png')
         sat = ImageEnhance.Color(img)
         img = sat.enhance(saturation)
-        img.save('swap/processed.jpg')
+        img.save('swap/processed.png')
 
-    def smoothing(self):
-        image = cv2.imread('swap/image.jpg')
-        image = cv2.blur(image,(5,5))
-        cv2.imwrite('swap/processed.jpg', image)
+    def sharpness(self, sharpness):
+        img = Image.open('swap/image.png')
+        enhancer = ImageEnhance.Sharpness(img)
+        img = enhancer.enhance(sharpness)
+        img.save('swap/processed.png')
 
-    def sharpening(self):
-        matrix = np.array([[-1,-1,-1], [-1,9,-1], [-1,-1,-1]])
-        image = cv2.imread('swap/image.jpg')
-        image = cv2.filter2D(image, -1, matrix)
-        cv2.imwrite('swap/processed.jpg', image)
-
-    def color_temperature(self, value):
-        image = Image.open('swap/image.jpg')
-        r, g, b = self.kelvin_table[value]
+    def color_temperature(self, temperature):
+        img = Image.open('swap/image.png')
+        r, g, b = self.kelvin_table[temperature]
         matrix = (r / 255.0, 0.0, 0.0, 0.0, 0.0, g / 255.0, 0.0, 0.0, 0.0, 0.0, b / 255.0, 0.0)
-        image = image.convert('RGB', matrix)
-        image.save('swap/processed.jpg')
+        img = img.convert('RGB', matrix)
+        img.save('swap/processed.png')
 
     def color_balance(self, r_scalar, g_scalar, b_scalar):
-        image = Image.open('swap/image.jpg')
+        img = Image.open('swap/image.png')
         matrix = (r_scalar, 0.0, 0.0, 0.0, 0.0, g_scalar, 0.0, 0.0, 0.0, 0.0, b_scalar, 0.0)
-        image = image.convert('RGB', matrix)
-        image.save('swap/processed.jpg')
+        img = img.convert('RGB', matrix)
+        img.save('swap/processed.png')
 
+    def all_operations(self, contrast, brightness, saturation, sharpness, temperature, r_scalar, g_scalar, b_scalar):
+        img = Image.open('swap/image.png')
+        # contrast
+        cont = ImageEnhance.Contrast(img)
+        img = cont.enhance(contrast)
+        # brightness
+        bright = ImageEnhance.Brightness(img)
+        img = bright.enhance(brightness)
+        # saturation
+        sat = ImageEnhance.Color(img)
+        img = sat.enhance(saturation)
+        # sharpness
+        enhancer = ImageEnhance.Sharpness(img)
+        img = enhancer.enhance(sharpness)
+        # color temperature
+        r, g, b = self.kelvin_table[temperature]
+        matrix = (r / 255.0, 0.0, 0.0, 0.0, 0.0, g / 255.0, 0.0, 0.0, 0.0, 0.0, b / 255.0, 0.0)
+        img = img.convert('RGB', matrix)
+        # color balance
+        matrix = (r_scalar, 0.0, 0.0, 0.0, 0.0, g_scalar, 0.0, 0.0, 0.0, 0.0, b_scalar, 0.0)
+        img = img.convert('RGB', matrix)
+        img.save('swap/processed.png')
 
 if __name__ == "__main__":
     dirName = "swap"
@@ -203,7 +220,5 @@ if __name__ == "__main__":
         callback_server_parameters=CallbackServerParameters()
     )
     processor = ImageProcessing(gateway)
+    processor.all_operations(1, 1, 1, 2, 4000, 1.5, 1, 1)
     gateway.entry_point.setProcessor(processor)
-
-
-
